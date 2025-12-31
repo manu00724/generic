@@ -1,0 +1,287 @@
+Great, this will round off the integration pack nicely. Below are two concrete deliverables you can directly hand to the platform team.
+
+
+---
+
+1️⃣ Platform Onboarding Checklist (Host Platform → BG System)
+
+This checklist is platform-facing (what they must configure / agree to before go-live).
+
+
+---
+
+A. Commercial & Ownership Alignment
+
+[ ] BG system identified as micro-frontend / external capability
+
+[ ] Host platform confirmed as identity & journey owner
+
+[ ] BG system confirmed as authorization-only (no login)
+
+
+
+---
+
+B. Authentication & Trust Setup
+
+Platform → BG Auth Service
+
+[ ] Client credentials issued (client_id, client_secret)
+
+[ ] Token audience (aud) agreed (e.g. bg-backend)
+
+[ ] Token signing algorithm agreed (HS256 / RS256)
+
+[ ] Token introspection / validation mechanism agreed
+
+
+Network Trust
+
+[ ] IP allowlist configured (if required)
+
+[ ] Mutual TLS decision documented (optional)
+
+[ ] TLS version ≥ 1.2 confirmed
+
+
+
+---
+
+C. API Contract Finalization
+
+Required APIs
+
+[ ] /token (Platform OAuth)
+
+[ ] /getVetted (Journey → BG entry)
+
+[ ] /submit (BG exit → next screen)
+
+
+Mandatory Fields (No Renaming Allowed)
+
+[ ] winame
+
+[ ] bgreferencenumber
+
+[ ] requestId
+
+[ ] sessionID
+
+[ ] requestingapp
+
+[ ] producttype = BG
+
+[ ] subproducttype = NBG
+
+
+
+---
+
+D. Journey Orchestration
+
+[ ] getVetted mapped to BG Vetting step
+
+[ ] Submit API mapped to next journey screen
+
+[ ] Duplicate submit handling defined (409 expected)
+
+[ ] Cancel / timeout behavior documented
+
+
+
+---
+
+E. Frontend Embedding
+
+[ ] Embedding mode confirmed (iframe / redirect)
+
+[ ] Token never exposed via URL params
+
+[ ] Context passed via secure payload
+
+[ ] Cross-origin policy agreed (CORS)
+
+
+
+---
+
+F. Error Handling Agreement
+
+Scenario	Expected
+
+Token expired	Platform re-initiates getVetted
+Duplicate submit	Platform blocks navigation
+BG mismatch	Platform shows generic error
+Host submit failure	Retry / manual fallback
+
+
+[ ] Error codes mapped between systems
+
+[ ] No internal error messages exposed to user
+
+
+
+---
+
+G. Audit & Compliance
+
+[ ] BG reference included in all logs
+
+[ ] User ID propagated (masked if needed)
+
+[ ] Submit timestamp captured
+
+[ ] Retention policy agreed
+
+
+
+---
+
+H. Pre-Go-Live Validation
+
+[ ] End-to-end UAT completed
+
+[ ] Token expiry tested
+
+[ ] Replay attack tested
+
+[ ] Multiple tabs scenario tested
+
+[ ] Pen-test signoff (if required)
+
+
+
+---
+
+✅ Platform Onboarding Exit Criteria
+
+> Platform can safely launch BG vetting with zero identity duplication and full audit compliance.
+
+
+
+
+---
+
+2️⃣ Sequence Diagram Image (Architecture-Accurate)
+
+Below is a diagram-ready sequence representation.
+You can recreate this as-is in draw.io, Lucid, or Mermaid.
+
+
+---
+
+Sequence Diagram (Authoritative Flow)
+
+User
+ |
+ | Clicks "BG Vetting"
+ v
+Host UI
+ |
+ | getVetted (BG context)
+ v
+Host Backend
+ |
+ | POST /token
+ v
+Platform Auth Server
+ |
+ | access_token
+ v
+Host Backend
+ |
+ | POST /auth/verify
+ | (platform token + BG context)
+ v
+BG Auth Service
+ |
+ | Validate platform token
+ | Validate BG state
+ |
+ | Issue BG session token
+ v
+BG Frontend
+ |
+ | GET BG data
+ | Authorization: BG session token
+ v
+BG Backend
+ |
+ | Validate BG token
+ | Populate BG text
+ v
+BG Frontend
+ |
+ | User edits BG
+ |
+ | Submit
+ v
+BG Backend
+ |
+ | Validate BG_WRITE scope
+ | Revoke token
+ |
+ | POST Submit API (BG text)
+ v
+Host Submit API
+ |
+ | OK
+ v
+Next Journey Screen
+
+
+---
+
+Notes for Diagram Review (Important)
+
+Token exchange never touches browser storage
+
+Platform token and BG token are never mixed
+
+Journey advancement happens only via Submit API
+
+BG Auth Service is a trust gate, not identity provider
+
+
+
+---
+
+Final Packaging Tip (PM-to-PM)
+
+If you’re sending this to the platform team, bundle as:
+
+1. 1-page PRD diagram
+
+
+2. Platform onboarding checklist
+
+
+3. Security checklist
+
+
+
+That combination answers:
+
+“Is this secure?”
+
+“Who owns what?”
+
+“How do we onboard without risk?”
+
+
+
+---
+
+If you want next, I can:
+
+Convert the sequence into Mermaid syntax
+
+Create a PPT slide with this diagram
+
+Write a platform kickoff email
+
+Prepare InfoSec Q&A (typical bank questions)
+
+
+Just tell me 👍
